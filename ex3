@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int main() {
+    // Bài 1
+    char s1[] = "Ky thuat VXL";
+    for (int i = 0; s1[i] != '\0'; i++) {
+        s1[i] = tolower(s1[i]);
+    }
+    printf("Chuoi thuong: %s\n", s1);
+
+    // Bài 2
+    char s2[] = "125";
+    int num = 0;
+    for (int i = 0; s2[i] != '\0'; i++) {
+        num = num * 10 + (s2[i] - '0');
+    }
+    printf("Gia tri so: %d\n", num);
+
+    return 0;
+}
