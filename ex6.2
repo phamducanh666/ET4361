@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node {
+    int data;
+    struct node* left;
+    struct node* right;
+};
+
+// (a) tạo node
+struct node* talloc(int data) {
+    struct node* newNode = (struct node*)malloc(sizeof(struct node));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// (b) addnode (BST)
+struct node* addnode(struct node* root, int data) {
+    if (root == NULL) return talloc(data);
+
+    if (data < root->data)
+        root->left = addnode(root->left, data);
+    else
+        root->right = addnode(root->right, data);
+
+    return root;
+}
+
+// (c) preorder
+void preorder(struct node* root) {
+    if (root == NULL) return;
+
+    printf("%d ", root->data);
+    preorder(root->left);
+    preorder(root->right);
+}
+
+// (d) inorder (sorted)
+void inorder(struct node* root) {
+    if (root == NULL) return;
+
+    inorder(root->left);
+    printf("%d ", root->data);
+    inorder(root->right);
+}
+
+// (e) delete tree (postorder)
+int deletetree(struct node* root) {
+    if (root == NULL) return 0;
+
+    int left = deletetree(root->left);
+    int right = deletetree(root->right);
+
+    free(root);
+
+    return left + right + 1;
+}
+
+// (f) main test
+int main() {
+    struct node* root = NULL;
+
+    int arr[] = {3, 1, 0, 2, 8, 6, 5, 9};
+    int n = sizeof(arr)/sizeof(arr[0]);
+
+    for (int i = 0; i < n; i++) {
+        root = addnode(root, arr[i]);
+    }
+
+    printf("Preorder: ");
+    preorder(root);
+    printf("\n");
+
+    printf("Inorder (sorted): ");
+    inorder(root);
+    printf("\n");
+
+    int count = deletetree(root);
+    printf("Deleted nodes: %d\n", count);
+
+    return 0;
+}
