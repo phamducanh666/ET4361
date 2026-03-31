@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node {
+    int data;
+    struct node* next;
+};
+
+// (a) display
+void display(struct node* head) {
+    struct node* temp = head;
+    while (temp != NULL) {
+        printf("%d -> ", temp->data);
+        temp = temp->next;
+    }
+    printf("NULL\n");
+}
+
+// (b) addback
+struct node* addback(struct node* head, int data) {
+    struct node* newNode = (struct node*)malloc(sizeof(struct node));
+    newNode->data = data;
+    newNode->next = NULL;
+
+    if (head == NULL) return newNode;
+
+    struct node* temp = head;
+    while (temp->next != NULL) {
+        temp = temp->next;
+    }
+    temp->next = newNode;
+
+    return head;
+}
+
+// (c) find
+struct node* find(struct node* head, int data) {
+    struct node* temp = head;
+    while (temp != NULL) {
+        if (temp->data == data) return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+// (d) delnode
+struct node* delnode(struct node* head, struct node* pelement) {
+    if (head == NULL || pelement == NULL) return head;
+
+    // xoá head
+    if (head == pelement) {
+        struct node* temp = head;
+        head = head->next;
+        free(temp);
+        return head;
+    }
+
+    struct node* temp = head;
+    while (temp->next != NULL && temp->next != pelement) {
+        temp = temp->next;
+    }
+
+    if (temp->next == pelement) {
+        temp->next = pelement->next;
+        free(pelement);
+    }
+
+    return head;
+}
+
+// (e) freelist
+void freelist(struct node* head) {
+    struct node* temp;
+    while (head != NULL) {
+        temp = head;
+        head = head->next;
+        free(temp);
+    }
+}
+
+// (f) main test
+int main() {
+    struct node* head = NULL;
+
+    // thêm phần tử
+    head = addback(head, 10);
+    head = addback(head, 20);
+    head = addback(head, 30);
+
+    printf("List: ");
+    display(head);
+
+    // tìm
+    struct node* p = find(head, 20);
+    if (p != NULL)
+        printf("Found: %d\n", p->data);
+    else
+        printf("Not found\n");
+
+    // xoá
+    head = delnode(head, p);
+    printf("After delete 20: ");
+    display(head);
+
+    // giải phóng
+    freelist(head);
+
+    return 0;
+}
