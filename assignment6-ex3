@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#define MAXVAL 100 /* Độ sâu tối đa của stack */
+
+int sp = 0;         /* Vị trí tiếp theo trong stack */
+double val[MAXVAL]; /* Ngăn xếp lưu các số */
+
+/* Hàm đẩy giá trị vào stack */
+void push(double f) {
+    if (sp < MAXVAL)
+        val[sp++] = f;
+    else
+        printf("error: stack full, can't push %g\n", f);
+}
+
+/* Hàm lấy giá trị từ stack */
+double pop(void) {
+    if (sp > 0)
+        return val[--sp];
+    else {
+        printf("error: stack empty\n");
+        return 0.0;
+    }
+}
+
+int main(int argc, char *argv[]) {
+    double op2;
+    char *s;
+
+    if (argc < 2) {
+        printf("Usage: expr operand1 operand2 operator ...\n");
+        return 1;
+    }
+
+    // Duyệt qua các đối số từ argv[1]
+    while (--argc > 0) {
+        s = *++argv; // Trỏ tới đối số tiếp theo
+        
+        // Kiểm tra xem đối số là số hay toán tử
+        // (Xử lý đơn giản: nếu ký tự đầu là số hoặc có dấu trừ đi kèm số)
+        if (!isdigit(s[0]) && strlen(s) == 1) {
+            switch (s[0]) {
+                case '+':
+                    push(pop() + pop());
+                    break;
+                case '*':
+                    push(pop() * pop());
+                    break;
+                case '-':
+                    op2 = pop();
+                    push(pop() - op2);
+                    break;
+                case '/':
+                    op2 = pop();
+                    if (op2 != 0.0)
+                        push(pop() / op2);
+                    else
+                        printf("error: zero divisor\n");
+                    break;
+                default:
+                    printf("error: unknown command %s\n", s);
+                    argc = 0;
+                    break;
+            }
+        } else {
+            push(atof(s)); // Chuyển chuỗi thành số thực và push vào stack
+        }
+    }
+
+    printf("\t%.8g\n", pop());
+    return 0;
+}
