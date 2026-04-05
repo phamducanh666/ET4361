@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <string.h>
+
+/**
+ * Hàm strend(s, t)
+ * Trả về 1 nếu t xuất hiện ở cuối s, ngược lại trả về 0.
+ */
+int strend(char *s, char *t) {
+    int len_s = strlen(s);
+    int len_t = strlen(t);
+
+    // Nếu chuỗi t dài hơn chuỗi s thì không thể khớp
+    if (len_t > len_s) {
+        return 0;
+    }
+
+    // Di chuyển con trỏ s tới vị trí bắt đầu so sánh
+    s += (len_s - len_t);
+
+    // So sánh từng ký tự từ vị trí đó cho đến hết
+    while (*s != '\0') {
+        if (*s != *t) {
+            return 0; // Thấy một ký tự khác nhau là sai ngay
+        }
+        s++;
+        t++;
+    }
+
+    return 1; // Khớp hoàn toàn
+}
+
+// Hàm main để kiểm tra kết quả
+int main() {
+    char s1[] = "hello world";
+    char t1[] = "world";
+    char t2[] = "hello";
+    char t3[] = "ld";
+
+    printf("Ket qua 1 ('world' in 'hello world'): %d\n", strend(s1, t1)); // Hy vọng ra 1
+    printf("Ket qua 2 ('hello' in 'hello world'): %d\n", strend(s1, t2)); // Hy vọng ra 0
+    printf("Ket qua 3 ('ld' in 'hello world'): %d\n", strend(s1, t3));    // Hy vọng ra 1
+
+    return 0;
+}
