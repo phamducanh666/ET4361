@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAXFIELDS 10
+
+// Cấu trúc lưu trữ tùy chọn cho mỗi trường
+struct field_option {
+    int numeric;   // -n
+    int reverse;   // -r
+    int directory; // -d
+    int fold;      // -f
+} options[MAXFIELDS];
+
+int num_fields = 0;
+
+/**
+ * Hàm trích xuất một trường từ dòng
+ * Giả sử các trường phân cách bởi dấu cách hoặc tab
+ */
+void get_field(char *dest, char *src, int field_idx) {
+    // Logic tìm đến trường thứ field_idx và copy vào dest
+    // ...
+}
+
+/**
+ * Hàm so sánh tùy chỉnh cho qsort
+ */
+int compare_fields(const void *v1, const void *v2) {
+    char *s1 = *(char **)v1;
+    char *s2 = *(char **)v2;
+    
+    for (int i = 0; i < num_fields; i++) {
+        char f1[100], f2[100];
+        get_field(f1, s1, i);
+        get_field(f2, s2, i);
+        
+        int res;
+        if (options[i].numeric) {
+            double n1 = atof(f1);
+            double n2 = atof(f2);
+            res = (n1 > n2) - (n1 < n2);
+        } else {
+            // Sử dụng logic so sánh chuỗi với -d, -f
+            res = strcmp(f1, f2); 
+        }
+        
+        if (res != 0) {
+            return options[i].reverse ? -res : res;
+        }
+    }
+    return 0;
+}
