@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TABLE_SIZE 10 // Kích thước mảng buckets. Để nhỏ để dễ quan sát collision và chaining.
+
+// Cấu trúc một nút trong danh sách liên kết
+struct Node {
+    char name[50];
+    char phone[20];
+    struct Node *next;
+};
+
+// Mảng các con trỏ buckets
+struct Node *buckets[TABLE_SIZE];
+
+// Hàm khởi tạo bảng băm
+void initTable() {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        buckets[i] = NULL;
+    }
+}
+
+// Hàm băm (sử dụng đa thức với hệ số 31)
+unsigned int hash(char *str) {
+    unsigned int hashValue = 0;
+    for (int i = 0; str[i] != '\0'; i++) {
+        hashValue = hashValue * 31 + str[i];
+    }
+    return hashValue % TABLE_SIZE;
+}
+
+// 1. Hàm thêm liên hệ mới vào bảng băm
+void insert(char *name, char *phone) {
+    unsigned int index = hash(name);
+    
+    // Tạo node mới
+    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
+    strcpy(newNode->name, name);
+    strcpy(newNode->phone, phone);
+    
+    // Chèn vào đầu danh sách liên kết tại buckets[index] (phương pháp chaining)
+    newNode->next = buckets[index];
+    buckets[index] = newNode;
+    
+    printf("Da them: %-15s - %s (Bucket %d)\n", name, phone, index);
+}
+
+// 2. Hàm tìm kiếm theo tên
+void search(char *name) {
+    unsigned int index = hash(name);
+    struct Node *temp = buckets[index];
+    
+    while (temp != NULL) {
+        if (strcmp(temp->name, name) == 0) {
+            printf("[Tim kiem] Tim thay: %s - SDT: %s\n", temp->name, temp->phone);
+            return;
+        }
+        temp = temp->next;
+    }
+    printf("[Tim kiem] Khong tim thay lien he: %s\n", name);
+}
+
+// 3. Hàm xóa một liên hệ khỏi bảng băm
+void delete(char *name) {
+    unsigned int index = hash(name);
+    struct Node *temp = buckets[index];
+    struct Node *prev = NULL;
+    
+    // Duyệt tìm node cần xóa
+    while (temp != NULL && strcmp(temp->name, name) != 0) {
+        prev = temp;
+        temp = temp->next;
+    }
+    
+    // Nếu không tìm thấy
+    if (temp == NULL) {
+        printf("[Xoa] Khong tim thay lien he de xoa: %s\n", name);
+        return;
+    }
+    
+    // Nếu node cần xóa nằm ở đầu danh sách (head)
+    if (prev == NULL) {
+        buckets[index] = temp->next;
+    } else {
+        // Bỏ qua node cần xóa
+        prev->next = temp->next;
+    }
+    
+    free(temp); // Giải phóng bộ nhớ
+    printf("[Xoa] Da xoa thanh cong lien he: %s\n", name);
+}
+
+// Hàm phụ trợ để in toàn bộ bảng băm (kiểm tra kết quả)
+void printTable() {
+    printf("\n--- BANG BAM HIEN TAI ---\n");
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        printf("Bucket %d: ", i);
+        struct Node *temp = buckets[i];
+        while (temp != NULL) {
+            printf("[%s: %s] -> ", temp->name, temp->phone);
+            temp = temp->next;
+        }
+        printf("NULL\n");
+    }
+    printf("-------------------------\n\n");
+}
+
+int main() {
+    initTable();
+    
+    printf("=== YEU CAU KIEM THU ===\n\n");
+    
+    // Yêu cầu 1: Nhập thử ít nhất 8 liên hệ
+    printf("1. Chen 8 lien he vao Hash Table:\n");
+    insert("Nguyen Van A", "0901234567");
+    insert("Tran Thi B", "0912345678");
+    insert("Le Van C", "0923456789");
+    insert("Pham Thi D", "0934567890");
+    insert("Hoang Van E", "0945678901");
+    insert("Vu Thi F", "0956789012");
+    insert("Ngo Van G", "0967890123");
+    insert("Do Thi H", "0978901234");
+    
+    printTable(); // In ra để xem cách dữ liệu được phân bố và chaining
+    
+    // Yêu cầu 2: Tìm kiếm tối thiểu 3 tên (ít nhất 1 tên không tồn tại)
+    printf("2. Thuc hien tim kiem:\n");
+    search("Le Van C");         // Tồn tại
+    search("Hoang Van E");      // Tồn tại
+    search("Ton That X");       // Không tồn tại
+    printf("\n");
+    
+    // Yêu cầu 3: Xóa 2 liên hệ và in lại bảng
+    printf("3. Thuc hien xoa lien he:\n");
+    delete("Nguyen Van A");
+    delete("Vu Thi F");
+    
+    // In lại bảng sau khi xóa để kiểm tra kết quả
+    printTable();
+    
+    return 0;
+}
