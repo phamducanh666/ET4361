@@ -1,0 +1,145 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_CAPACITY 100
+
+// Cấu trúc Patient theo yêu cầu
+typedef struct {
+    char name[50];
+    int priority;
+} Patient;
+
+// Cấu trúc quản lý Max-Heap
+typedef struct {
+    Patient heap[MAX_CAPACITY];
+    int size;
+} MaxHeap;
+
+// Hàm khởi tạo heap rỗng
+void initHeap(MaxHeap *h) {
+    h->size = 0;
+}
+
+// Hàm hoán đổi 2 phần tử Patient
+void swap(Patient *a, Patient *b) {
+    Patient temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// ---------------- CÁC HÀM XỬ LÝ HEAP ----------------
+
+// Đưa phần tử từ dưới lên vị trí đúng (Max-Heap)
+void heapifyUp(MaxHeap *h, int index) {
+    int parent = (index - 1) / 2;
+    // Nếu chưa lên tới gốc và độ ưu tiên của con lớn hơn cha
+    while (index > 0 && h->heap[index].priority > h->heap[parent].priority) {
+        swap(&h->heap[index], &h->heap[parent]);
+        index = parent;
+        parent = (index - 1) / 2;
+    }
+}
+
+// Đưa phần tử từ gốc chìm xuống vị trí đúng (Max-Heap)
+void heapifyDown(MaxHeap *h, int index) {
+    int largest = index;
+    int left = 2 * index + 1;
+    int right = 2 * index + 2;
+
+    // So sánh với con trái
+    if (left < h->size && h->heap[left].priority > h->heap[largest].priority) {
+        largest = left;
+    }
+    // So sánh với con phải
+    if (right < h->size && h->heap[right].priority > h->heap[largest].priority) {
+        largest = right;
+    }
+
+    // Nếu nút lớn nhất không phải là cha, hoán đổi và đệ quy chìm tiếp
+    if (largest != index) {
+        swap(&h->heap[index], &h->heap[largest]);
+        heapifyDown(h, largest);
+    }
+}
+
+// ---------------- CÁC HÀM GIAO TIẾP (YÊU CẦU ĐỀ BÀI) ----------------
+
+// 1. Xem bệnh nhân có ưu tiên cao nhất
+Patient peek(MaxHeap *h) {
+    if (h->size == 0) {
+        Patient empty = {"", -1}; // Trả về thông tin rỗng nếu hàng đợi trống
+        return empty;
+    }
+    return h->heap[0];
+}
+
+// 2. Thêm bệnh nhân vào hàng đợi
+void push(MaxHeap *h, Patient p) {
+    if (h->size == MAX_CAPACITY) {
+        printf("Hang doi da day, khong the them!\n");
+        return;
+    }
+    // Thêm vào cuối mảng
+    h->heap[h->size] = p;
+    h->size++;
+    
+    // Sắp xếp lại heap từ dưới lên
+    heapifyUp(h, h->size - 1);
+    
+    // Yêu cầu: In ra bệnh nhân đứng đầu sau mỗi lần thêm
+    Patient top = peek(h);
+    printf("Da them [%s - Uu tien: %d]. Nguoi dung dau hien tai: %s\n", 
+           p.name, p.priority, top.name);
+}
+
+// 3. Lấy bệnh nhân có ưu tiên cao nhất ra khỏi hàng đợi
+Patient pop(MaxHeap *h) {
+    if (h->size == 0) {
+        printf("Hang doi trong!\n");
+        Patient empty = {"", -1};
+        return empty;
+    }
+    
+    Patient highestPriorityPatient = h->heap[0];
+    
+    // Đưa phần tử cuối cùng lên làm gốc
+    h->heap[0] = h->heap[h->size - 1];
+    h->size--;
+    
+    // Khôi phục tính chất Max-Heap bằng cách chìm từ gốc xuống
+    heapifyDown(h, 0);
+    
+    return highestPriorityPatient;
+}
+
+// ---------------- HÀM MAIN (KỊCH BẢN KIỂM THỬ) ----------------
+int main() {
+    MaxHeap pq;
+    initHeap(&pq);
+    
+    printf("--- GIAI DOAN 1: TIEP NHAN BENH NHAN ---\n");
+    // Nhập 5 bệnh nhân với các mức ưu tiên khác nhau
+    Patient p1 = {"Nguyen Van A (Kham thuong)", 1};
+    Patient p2 = {"Le Thi B (Cap cuu nhe)", 5};
+    Patient p3 = {"Tran Van C (Kham uu tien)", 3};
+    Patient p4 = {"Phan Thi D (Cap cuu nguy kich)", 10};
+    Patient p5 = {"Ngo Van E (Nguoi cao tuoi)", 4};
+    
+    push(&pq, p1);
+    push(&pq, p2);
+    push(&pq, p3);
+    push(&pq, p4);
+    push(&pq, p5);
+    
+    printf("\n--- GIAI DOAN 2:GOI BENH NHAN VAO KHAM ---\n");
+    // Thực hiện lấy lần lượt và in thứ tự khám
+    int order = 1;
+    while (pq.size > 0) {
+        Patient p = pop(&pq);
+        printf("STT %d: Moi benh nhan %s (Muc uu tien: %d) vao phong kham.\n", 
+               order, p.name, p.priority);
+        order++;
+    }
+
+    return 0;
+}
